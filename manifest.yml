@@ -9,6 +9,9 @@ modules:
     function:
         - key: resolver
           handler: index.handler
+permissions:
+    scopes:
+        - read:jira-user
 resources:
     - key: main
       path: src/frontend/index.jsx

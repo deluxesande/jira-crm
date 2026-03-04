@@ -1,19 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import {
-    Text,
     Button,
-    Inline,
-    Stack,
-    UserPicker,
     Heading,
-    Strong,
-    Select,
+    Inline,
     Modal,
-    ModalTitle,
     ModalBody,
     ModalFooter,
     ModalHeader,
+    ModalTitle,
+    Select,
+    Stack,
+    Strong,
+    Text,
+    UserPicker,
+    Lozenge,
 } from "@forge/react";
+import { invoke } from "@forge/bridge";
 
 export const LeadModal = ({
     isOpen,
@@ -23,18 +25,50 @@ export const LeadModal = ({
     statusOptions,
     priorityOptions,
 }) => {
+    // Add local state to show a loading spinner on the button when clicked
+    const [isCreating, setIsCreating] = useState(false);
+
     if (!isOpen || !activeLead) return null;
+
+    // Function to handle the backend call when the button is clicked
+    const handleCreateFollowUp = async () => {
+        setIsCreating(true); // Starts the button spinner
+
+        // Call the backend resolver
+        const response = await invoke("createFollowUpIssue", {
+            lead: activeLead,
+        });
+        console.log("Backend response:", response.message);
+
+        setIsCreating(false); // Stops the button spinner
+        closeModal(); // Close the modal upon success
+    };
 
     return (
         <Modal onClose={closeModal} width="x-large">
             <ModalHeader>
-                <ModalTitle>
-                    <Text>{activeLead.id}</Text>
-                </ModalTitle>
+                <ModalTitle></ModalTitle>
             </ModalHeader>
             <ModalBody>
                 <Stack space="space.400">
-                    {/* Header Area with Status Dropdown */}
+                    <Inline spread="space-between" alignBlock="center">
+                        <Text>
+                            <Strong>{activeLead.id}</Strong>
+                        </Text>
+
+                        <Inline space="space.100" alignBlock="center">
+                            <Lozenge appearance="new">NO FOLLOW-UP</Lozenge>
+                            <Button
+                                appearance="primary"
+                                isDisabled={!activeLead.assignee}
+                                isLoading={isCreating}
+                                onClick={handleCreateFollowUp}
+                            >
+                                Create Follow-up
+                            </Button>
+                        </Inline>
+                    </Inline>
+
                     <Inline
                         space="space.200"
                         spread="space-between"
@@ -59,17 +93,15 @@ export const LeadModal = ({
                         />
                     </Inline>
 
-                    {/* Main 2-Column Layout */}
                     <Inline space="space.600" alignBlock="start">
-                        {/* Left Column: Description & Work */}
                         <Stack space="space.400">
                             <Stack space="space.100">
                                 <Heading as="h4">Description</Heading>
                                 <Text>
-                                    Inbound lead originating from the **
-                                    {activeLead.campaign}**. The company
-                                    associated with this prospect is **
-                                    {activeLead.company}**.
+                                    Inbound lead originating from the{" "}
+                                    {activeLead.campaign}. The company
+                                    associated with this prospect is{" "}
+                                    {activeLead.company}.
                                 </Text>
                                 <Text>
                                     Please review the CRM details, verify the
@@ -84,7 +116,6 @@ export const LeadModal = ({
                             </Stack>
                         </Stack>
 
-                        {/* Right Column: Details Sidebar */}
                         <Stack space="space.300">
                             <Heading as="h4">Details</Heading>
 
@@ -96,20 +127,14 @@ export const LeadModal = ({
                                     <UserPicker
                                         placeholder="Unassigned"
                                         name={`modal-assignee-${activeLead.id}`}
-                                        onChange={(user) =>
-                                            console.log(
-                                                `Assigned via modal:`,
-                                                user,
+                                        onChange={(userId) =>
+                                            updateLead(
+                                                activeLead.id,
+                                                "assignee",
+                                                userId,
                                             )
                                         }
                                     />
-                                </Stack>
-
-                                <Stack space="space.050">
-                                    <Text>
-                                        <Strong>Reporter</Strong>
-                                    </Text>
-                                    <Text>Deluxe Sande</Text>
                                 </Stack>
 
                                 <Stack space="space.050">
@@ -139,7 +164,7 @@ export const LeadModal = ({
                 </Stack>
             </ModalBody>
             <ModalFooter>
-                <Button appearance="subtle" onClick={closeModal}>
+                <Button appearance="warning" onClick={closeModal}>
                     Close
                 </Button>
             </ModalFooter>

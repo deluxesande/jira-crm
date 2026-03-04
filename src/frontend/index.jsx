@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ForgeReconciler, {
     Text,
     DynamicTable,
@@ -8,57 +8,31 @@ import ForgeReconciler, {
     Heading,
     Strong,
     Select,
+    Spinner,
+    Inline,
 } from "@forge/react";
-
-// Import the new modal component you just created
+import { invoke } from "@forge/bridge"; // Added to communicate with the backend
 import { LeadModal } from "./LeadModal";
 
-const initialLeads = [
-    {
-        id: "LEAD-101",
-        prospect: "Leanne Graham",
-        company: "Romaguera-Crona",
-        campaign: "Q1 PR Gala Event",
-        priority: "Medium",
-        status: "not_started",
-    },
-    {
-        id: "LEAD-102",
-        prospect: "Ervin Howell",
-        company: "Deckow-Crist",
-        campaign: "Social Media Ad",
-        priority: "High",
-        status: "in_progress",
-    },
-    {
-        id: "LEAD-103",
-        prospect: "Clementine Bauch",
-        company: "Romaguera-Jacobson",
-        campaign: "Webinar Sign-up",
-        priority: "Highest",
-        status: "done",
-    },
-];
-
-const statusOptions = [
-    { label: "Not Started", value: "not_started" },
-    { label: "In Progress", value: "in_progress" },
-    { label: "Done", value: "done" },
-];
-
-const priorityOptions = [
-    { label: "Highest", value: "Highest" },
-    { label: "High", value: "High" },
-    { label: "Medium", value: "Medium" },
-    { label: "Low", value: "Low" },
-];
-
 const App = () => {
-    const [leads, setLeads] = useState(initialLeads);
+    const [leads, setLeads] = useState([]);
+    const [statusOptions, setStatusOptions] = useState([]);
+    const [priorityOptions, setPriorityOptions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeLead, setActiveLead] = useState(null);
 
-    const updateLead = (id, field, value) => {
+    useEffect(() => {
+        invoke("getInitialData").then((data) => {
+            setLeads(data.leads);
+            setStatusOptions(data.statusOptions);
+            setPriorityOptions(data.priorityOptions);
+            setIsLoading(false);
+        });
+    }, []);
+
+    const updateLead = async (id, field, value) => {
         setLeads((prevLeads) =>
             prevLeads.map((lead) =>
                 lead.id === id ? { ...lead, [field]: value } : lead,
@@ -68,6 +42,8 @@ const App = () => {
         if (activeLead && activeLead.id === id) {
             setActiveLead((prev) => ({ ...prev, [field]: value }));
         }
+
+        await invoke("updateLeadField", { leadId: id, field, value });
     };
 
     const openModal = (lead) => {
@@ -79,6 +55,15 @@ const App = () => {
         setIsModalOpen(false);
         setActiveLead(null);
     };
+
+    if (isLoading) {
+        return (
+            <Stack space="space.200" alignInline="center">
+                <Spinner size="large" />
+                <Text>Loading CRM Leads...</Text>
+            </Stack>
+        );
+    }
 
     const head = {
         cells: [
@@ -114,8 +99,9 @@ const App = () => {
                     <UserPicker
                         placeholder="Unassigned"
                         name={`assignee-${lead.id}`}
-                        onChange={(user) =>
-                            console.log(`Assigned ${lead.id} to:`, user)
+                        // userId is already the raw string!
+                        onChange={(userId) =>
+                            updateLead(lead.id, "assignee", userId)
                         }
                     />
                 ),
