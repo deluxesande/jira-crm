@@ -11,7 +11,7 @@ import ForgeReconciler, {
     Spinner,
     Inline,
 } from "@forge/react";
-import { invoke } from "@forge/bridge"; // Added to communicate with the backend
+import { invoke } from "@forge/bridge";
 import { LeadModal } from "./LeadModal";
 
 const App = () => {
@@ -99,7 +99,7 @@ const App = () => {
                     <UserPicker
                         placeholder="Unassigned"
                         name={`assignee-${lead.id}`}
-                        // userId is already the raw string!
+                        value={lead.assignee || null}
                         onChange={(userId) =>
                             updateLead(lead.id, "assignee", userId)
                         }

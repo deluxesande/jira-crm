@@ -25,23 +25,20 @@ export const LeadModal = ({
     statusOptions,
     priorityOptions,
 }) => {
-    // Add local state to show a loading spinner on the button when clicked
     const [isCreating, setIsCreating] = useState(false);
 
     if (!isOpen || !activeLead) return null;
 
-    // Function to handle the backend call when the button is clicked
     const handleCreateFollowUp = async () => {
-        setIsCreating(true); // Starts the button spinner
+        setIsCreating(true);
 
-        // Call the backend resolver
         const response = await invoke("createFollowUpIssue", {
             lead: activeLead,
         });
         console.log("Backend response:", response.message);
 
-        setIsCreating(false); // Stops the button spinner
-        closeModal(); // Close the modal upon success
+        setIsCreating(false);
+        closeModal();
     };
 
     return (
@@ -126,6 +123,7 @@ export const LeadModal = ({
                                     </Text>
                                     <UserPicker
                                         placeholder="Unassigned"
+                                        value={activeLead.assignee || null}
                                         name={`modal-assignee-${activeLead.id}`}
                                         onChange={(userId) =>
                                             updateLead(

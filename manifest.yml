@@ -12,6 +12,8 @@ modules:
 permissions:
     scopes:
         - read:jira-user
+        - write:jira-work
+        - storage:app
 resources:
     - key: main
       path: src/frontend/index.jsx
