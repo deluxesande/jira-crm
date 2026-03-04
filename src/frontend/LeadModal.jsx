@@ -147,7 +147,9 @@ export const LeadModal = ({
                                     </Text>
                                     <UserPicker
                                         placeholder="Unassigned"
-                                        defaultValue={safeAssigneeId}
+                                        defaultValue={
+                                            safeAssigneeId || undefined
+                                        }
                                         name={`modal-assignee-${activeLead.id}`}
                                         onChange={(userId) =>
                                             updateLead(

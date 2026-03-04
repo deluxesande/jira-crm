@@ -103,7 +103,11 @@ const App = () => {
             },
             {
                 key: "assignee",
-                content: <User accountId={getSafeUserId(lead.assignee)} />,
+                content: lead.assignee ? (
+                    <User accountId={getSafeUserId(lead.assignee)} />
+                ) : (
+                    <Text>Unassigned</Text>
+                ),
             },
             {
                 key: "priority",
