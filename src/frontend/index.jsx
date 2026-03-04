@@ -10,11 +10,12 @@ import ForgeReconciler, {
     Select,
     Spinner,
     Inline,
+    User,
+    Link, // Imported Link
 } from "@forge/react";
 import { invoke } from "@forge/bridge";
 import { LeadModal } from "./LeadModal";
 
-// Helper function to guarantee we only pass a clean string to the UserPicker
 export const getSafeUserId = (user) => {
     if (!user) return null;
     return typeof user === "object" ? user.accountId || user.id : user;
@@ -77,6 +78,7 @@ const App = () => {
             { key: "assignee", content: "Assignee" },
             { key: "priority", content: "Priority" },
             { key: "status", content: "Status" },
+            { key: "issueKey", content: "Issue Key" },
         ],
     };
 
@@ -101,17 +103,7 @@ const App = () => {
             },
             {
                 key: "assignee",
-                content: (
-                    <UserPicker
-                        placeholder="Unassigned"
-                        name={`assignee-${lead.id}`}
-                        // Use the helper to sanitize bad database objects
-                        value={getSafeUserId(lead.assignee)}
-                        onChange={(userId) =>
-                            updateLead(lead.id, "assignee", userId)
-                        }
-                    />
-                ),
+                content: <User accountId={getSafeUserId(lead.assignee)} />,
             },
             {
                 key: "priority",
@@ -141,6 +133,16 @@ const App = () => {
                             updateLead(lead.id, "status", option.value)
                         }
                     />
+                ),
+            },
+            {
+                key: "issueKey",
+                content: lead.issueKey ? (
+                    <Link href={`/browse/${lead.issueKey}`} target="_blank">
+                        {lead.issueKey}
+                    </Link>
+                ) : (
+                    "—"
                 ),
             },
         ],

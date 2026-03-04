@@ -14,9 +14,10 @@ import {
     Text,
     UserPicker,
     Lozenge,
+    Link, // Imported Link
 } from "@forge/react";
 import { invoke } from "@forge/bridge";
-import { getSafeUserId } from "./index"; // Import the helper
+import { getSafeUserId } from "./index";
 
 export const LeadModal = ({
     isOpen,
@@ -38,8 +39,14 @@ export const LeadModal = ({
             lead: activeLead,
         });
         console.log("Backend response:", response.message);
+
+        // NEW: If successful, update the lead state and KVS DB with the new issue key
+        if (response.success && response.issueKey) {
+            await updateLead(activeLead.id, "issueKey", response.issueKey);
+        }
+
         setIsCreating(false);
-        closeModal();
+        // Note: Intentionally NOT closing the modal here so the user sees the Lozenge update!
     };
 
     return (
@@ -53,16 +60,35 @@ export const LeadModal = ({
                         <Text>
                             <Strong>{activeLead.id}</Strong>
                         </Text>
+
                         <Inline space="space.100" alignBlock="center">
-                            <Lozenge appearance="new">NO FOLLOW-UP</Lozenge>
-                            <Button
-                                appearance="primary"
-                                isDisabled={!safeAssigneeId}
-                                isLoading={isCreating}
-                                onClick={handleCreateFollowUp}
-                            >
-                                Create Follow-up
-                            </Button>
+                            {/* NEW: Conditional logic based on issueKey */}
+                            {activeLead.issueKey ? (
+                                <>
+                                    <Lozenge appearance="success">
+                                        FOLLOWED UP
+                                    </Lozenge>
+                                    <Link
+                                        href={`/browse/${activeLead.issueKey}`}
+                                    >
+                                        Open {activeLead.issueKey}
+                                    </Link>
+                                </>
+                            ) : (
+                                <>
+                                    <Lozenge appearance="new">
+                                        NO FOLLOW-UP
+                                    </Lozenge>
+                                    <Button
+                                        appearance="primary"
+                                        isDisabled={!safeAssigneeId}
+                                        isLoading={isCreating}
+                                        onClick={handleCreateFollowUp}
+                                    >
+                                        Create Follow-up
+                                    </Button>
+                                </>
+                            )}
                         </Inline>
                     </Inline>
 
@@ -121,8 +147,7 @@ export const LeadModal = ({
                                     </Text>
                                     <UserPicker
                                         placeholder="Unassigned"
-                                        // Guaranteeing only a clean string makes it here
-                                        value={safeAssigneeId}
+                                        defaultValue={safeAssigneeId}
                                         name={`modal-assignee-${activeLead.id}`}
                                         onChange={(userId) =>
                                             updateLead(

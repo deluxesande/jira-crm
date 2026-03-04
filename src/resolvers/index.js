@@ -32,6 +32,7 @@ resolver.define("getInitialData", async (req) => {
                 priority: "Medium",
                 status: "not_started",
                 assignee: null,
+                issueKey: null, // Added to seed data
             },
             {
                 id: "LEAD-102",
@@ -41,6 +42,7 @@ resolver.define("getInitialData", async (req) => {
                 priority: "High",
                 status: "in_progress",
                 assignee: null,
+                issueKey: null, // Added to seed data
             },
             {
                 id: "LEAD-103",
@@ -50,6 +52,7 @@ resolver.define("getInitialData", async (req) => {
                 priority: "Highest",
                 status: "done",
                 assignee: null,
+                issueKey: null, // Added to seed data
             },
         ];
         await kvs.set("crm_leads_db", storedLeads);
@@ -154,16 +157,13 @@ resolver.define("createFollowUpIssue", async (req) => {
         },
     };
 
-    // 2. Safely extract and format the assignee
     if (lead.assignee) {
         let accountIdString = lead.assignee;
 
-        // If KVS stored an object from a previous test, grab the ID no matter what key it's hiding under
         if (typeof lead.assignee === "object" && lead.assignee !== null) {
             accountIdString = lead.assignee.accountId || lead.assignee.id;
         }
 
-        // Pass BOTH accountId and id so Jira Cloud accepts it unconditionally
         if (accountIdString) {
             bodyData.fields.assignee = {
                 id: accountIdString,
@@ -195,7 +195,7 @@ resolver.define("createFollowUpIssue", async (req) => {
     return {
         success: true,
         message: `Successfully created Jira issue: ${newIssue.key}`,
-        issueKey: newIssue.key,
+        issueKey: newIssue.key, // We pass this back to the frontend
     };
 });
 
