@@ -16,6 +16,7 @@ import {
     Lozenge,
 } from "@forge/react";
 import { invoke } from "@forge/bridge";
+import { getSafeUserId } from "./index"; // Import the helper
 
 export const LeadModal = ({
     isOpen,
@@ -29,14 +30,14 @@ export const LeadModal = ({
 
     if (!isOpen || !activeLead) return null;
 
+    const safeAssigneeId = getSafeUserId(activeLead.assignee);
+
     const handleCreateFollowUp = async () => {
         setIsCreating(true);
-
         const response = await invoke("createFollowUpIssue", {
             lead: activeLead,
         });
         console.log("Backend response:", response.message);
-
         setIsCreating(false);
         closeModal();
     };
@@ -52,12 +53,11 @@ export const LeadModal = ({
                         <Text>
                             <Strong>{activeLead.id}</Strong>
                         </Text>
-
                         <Inline space="space.100" alignBlock="center">
                             <Lozenge appearance="new">NO FOLLOW-UP</Lozenge>
                             <Button
                                 appearance="primary"
-                                isDisabled={!activeLead.assignee}
+                                isDisabled={!safeAssigneeId}
                                 isLoading={isCreating}
                                 onClick={handleCreateFollowUp}
                             >
@@ -106,7 +106,6 @@ export const LeadModal = ({
                                     subtasks for the marketing team to execute.
                                 </Text>
                             </Stack>
-
                             <Stack space="space.100">
                                 <Heading as="h4">Related work</Heading>
                                 <Text>No linked items.</Text>
@@ -115,7 +114,6 @@ export const LeadModal = ({
 
                         <Stack space="space.300">
                             <Heading as="h4">Details</Heading>
-
                             <Stack space="space.200">
                                 <Stack space="space.050">
                                     <Text>
@@ -123,7 +121,8 @@ export const LeadModal = ({
                                     </Text>
                                     <UserPicker
                                         placeholder="Unassigned"
-                                        value={activeLead.assignee || null}
+                                        // Guaranteeing only a clean string makes it here
+                                        value={safeAssigneeId}
                                         name={`modal-assignee-${activeLead.id}`}
                                         onChange={(userId) =>
                                             updateLead(
@@ -134,7 +133,6 @@ export const LeadModal = ({
                                         }
                                     />
                                 </Stack>
-
                                 <Stack space="space.050">
                                     <Text>
                                         <Strong>Priority</Strong>

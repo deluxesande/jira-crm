@@ -14,6 +14,12 @@ import ForgeReconciler, {
 import { invoke } from "@forge/bridge";
 import { LeadModal } from "./LeadModal";
 
+// Helper function to guarantee we only pass a clean string to the UserPicker
+export const getSafeUserId = (user) => {
+    if (!user) return null;
+    return typeof user === "object" ? user.accountId || user.id : user;
+};
+
 const App = () => {
     const [leads, setLeads] = useState([]);
     const [statusOptions, setStatusOptions] = useState([]);
@@ -99,7 +105,8 @@ const App = () => {
                     <UserPicker
                         placeholder="Unassigned"
                         name={`assignee-${lead.id}`}
-                        value={lead.assignee || null}
+                        // Use the helper to sanitize bad database objects
+                        value={getSafeUserId(lead.assignee)}
                         onChange={(userId) =>
                             updateLead(lead.id, "assignee", userId)
                         }
@@ -143,7 +150,6 @@ const App = () => {
         <Stack space="space.300">
             <Heading as="h3">Inbound Lead Triage</Heading>
             <DynamicTable head={head} rows={rows} />
-
             <LeadModal
                 isOpen={isModalOpen}
                 closeModal={closeModal}
