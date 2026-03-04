@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
+import { invoke } from "@forge/bridge";
 import ForgeReconciler, {
-    Text,
-    DynamicTable,
     Button,
-    Stack,
-    UserPicker,
+    DynamicTable,
     Heading,
-    Strong,
+    Link,
     Select,
     Spinner,
-    Inline,
+    Stack,
+    Strong,
+    Text,
     User,
-    Link, // Imported Link
 } from "@forge/react";
-import { invoke } from "@forge/bridge";
+import { useEffect, useState } from "react";
 import { LeadModal } from "./LeadModal";
 
 export const getSafeUserId = (user) => {
@@ -30,6 +28,7 @@ const App = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeLead, setActiveLead] = useState(null);
 
+    // Get initial data on mount
     useEffect(() => {
         invoke("getInitialData").then((data) => {
             setLeads(data.leads);
@@ -155,6 +154,7 @@ const App = () => {
     return (
         <Stack space="space.300">
             <Heading as="h3">Inbound Lead Triage</Heading>
+            <Text>Click on a lead to view details and update its status.</Text>
             <DynamicTable head={head} rows={rows} />
             <LeadModal
                 isOpen={isModalOpen}

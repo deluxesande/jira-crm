@@ -1,29 +1,29 @@
 modules:
-  jira:projectPage:
-    - key: jira-crm-hello-world-project-page
-      resource: main
-      resolver:
-        function: resolver
-      render: native
-      title: crm
-  function:
-    - key: resolver
-      handler: index.handler
+    jira:projectPage:
+        - key: jira-crm-hello-world-project-page
+          resource: main
+          resolver:
+              function: resolver
+          render: native
+          title: Lead Pipeline
+    function:
+        - key: resolver
+          handler: index.handler
 permissions:
-  scopes:
-    - read:jira-user
-    - write:jira-work
-    - storage:app
-  external:
-    fetch:
-      backend:
-        - address: jsonplaceholder.typicode.com
+    scopes:
+        - read:jira-user
+        - write:jira-work
+        - storage:app
+    external:
+        fetch:
+            backend:
+                - address: jsonplaceholder.typicode.com
 resources:
-  - key: main
-    path: src/frontend/index.jsx
+    - key: main
+      path: src/frontend/index.jsx
 app:
-  runtime:
-    name: nodejs24.x
-    memoryMB: 256
-    architecture: arm64
-  id: ari:cloud:ecosystem::app/9b3ec8c6-db89-4d1d-87f3-9dbb16045a69
+    runtime:
+        name: nodejs24.x
+        memoryMB: 256
+        architecture: arm64
+    id: ari:cloud:ecosystem::app/9b3ec8c6-db89-4d1d-87f3-9dbb16045a69

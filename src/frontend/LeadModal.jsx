@@ -14,7 +14,7 @@ import {
     Text,
     UserPicker,
     Lozenge,
-    Link, // Imported Link
+    Link,
 } from "@forge/react";
 import { invoke } from "@forge/bridge";
 import { getSafeUserId } from "./index";

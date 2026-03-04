@@ -75,6 +75,7 @@ async function fetchAndTransformExternalLeads(existingLeads = []) {
  */
 resolver.define("getInitialData", async (req) => {
     console.log("Backend: Checking CRM lead volume...");
+    // Key-Value Store
     let storedLeads = (await kvs.get("crm_leads_db")) || [];
 
     // Filter leads that have NOT been followed up on (issueKey is null)
